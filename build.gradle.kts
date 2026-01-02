@@ -13,6 +13,7 @@ import io.izzel.taboolib.gradle.MinecraftChat
 
 plugins {
     java
+    `maven-publish`
     id("io.izzel.taboolib") version "2.0.27"
     id("org.jetbrains.kotlin.jvm") version "2.2.0"
 }
@@ -36,7 +37,7 @@ taboolib {
             name("sky")
         }
     }
-    version { taboolib = "6.2.4-5902762" }
+    version { taboolib = "6.2.4-8d51195" }
 }
 
 repositories {
@@ -71,13 +72,14 @@ configure(subprojects) {
     apply(plugin = "java")
     apply(plugin = "io.izzel.taboolib")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "maven-publish")
 
     taboolib {
         env {
             install(Basic)
             install(MinecraftChat)
         }
-        version { taboolib = "6.2.4-5902762" }
+        version { taboolib = "6.2.4-8d51195" }
     }
     
     repositories {
@@ -114,5 +116,51 @@ tasks {
         from(rootProject.findProject(":platform-bukkit")!!.sourceSets["main"].output)
         from(rootProject.findProject(":platform-bungeecord")!!.sourceSets["main"].output)
         from(rootProject.findProject(":platform-velocity")!!.sourceSets["main"].output)
+    }
+}
+
+subprojects
+    .forEach { proj ->
+        proj.publishing { applyToSub(proj) }
+    }
+
+project.publishing { applyToSub(project, false) }
+
+fun PublishingExtension.applyToSub(proj: Project, subProject: Boolean = true) {
+    repositories {
+        maven("https://repo.tabooproject.org/repository/releases") {
+            credentials {
+                username = project.findProperty("taboolibUsername").toString()
+                password = project.findProperty("taboolibPassword").toString()
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+        mavenLocal()
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            // 构件名
+            artifactId = if (subProject) proj.name else "core"
+            // 组
+            groupId = "org.tabooproject.fluxon.plugin"
+            // 版本号
+            version = project.findProperty("version").toString()
+            // 构件
+            artifact(proj.tasks["kotlinSourcesJar"])
+            if (subProject) {
+                artifact(proj.tasks["jar"])
+            } else {
+                // 推送到远程的核心代码中没有平台代码
+                artifact(tasks.register<Jar>("coreJar") {
+                    archiveClassifier.set("core")
+                    from(sourceSets["main"].output)
+                }) {
+                    classifier = null
+                }
+            }
+            println("> Apply \"$groupId:$artifactId:$version\"")
+        }
     }
 }

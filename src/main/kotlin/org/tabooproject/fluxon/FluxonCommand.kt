@@ -7,6 +7,7 @@ import org.tabooproject.fluxon.util.exceptFluxonCompletableFutureError
 import org.tabooproject.fluxon.util.findScriptFile
 import org.tabooproject.fluxon.util.tell
 import org.tabooproject.fluxon.util.toScriptId
+import taboolib.common.Requires
 import taboolib.common.platform.ProxyCommandSender
 import taboolib.common.platform.command.*
 import taboolib.common.platform.function.getDataFolder
@@ -15,6 +16,7 @@ import taboolib.common5.Demand
 import taboolib.expansion.createHelper
 import kotlin.time.measureTime
 
+@Requires(classes = ["!org.tabooproject.fluxon.ParseScript"])
 @CommandHeader("fluxon", aliases = ["fn"])
 object FluxonCommand {
 

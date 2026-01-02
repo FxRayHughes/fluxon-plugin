@@ -3,12 +3,14 @@ package org.tabooproject.fluxon
 import org.tabooproject.fluxon.compiler.FluxonFeatures
 import org.tabooproject.fluxon.inst.function.FunctionJvm
 import org.tabooproject.fluxon.runtime.FluxonRuntime
-import taboolib.common.platform.Plugin
+import taboolib.common.LifeCycle
+import taboolib.common.platform.Awake
 import taboolib.common.util.runSync
 
-object FluxonPlugin : Plugin() {
+object FluxonPlugin {
 
-    init {
+    @Awake(LifeCycle.INIT)
+    fun init() {
         // 启用特性
         FluxonFeatures.DEFAULT_ALLOW_INVALID_REFERENCE = true
         FluxonFeatures.DEFAULT_ALLOW_REFLECTION_ACCESS = true
@@ -20,8 +22,5 @@ object FluxonPlugin : Plugin() {
         FluxonRuntime.getInstance().setPrimaryThreadExecutor {
             runSync { it.run() }
         }
-    }
-
-    override fun onEnable() {
     }
 }
