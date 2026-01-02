@@ -38,7 +38,8 @@ repositories {
 }
 
 dependencies {
-    taboo("org.tabooproject.fluxon:core:1.4.4") { isTransitive = false }
+    taboo("org.tabooproject.fluxon:core:1.4.5") { isTransitive = false }
+    taboo("org.tabooproject.fluxon:inst-core:1.4.5") { isTransitive = false }
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))
 }
@@ -64,15 +65,23 @@ configure(subprojects) {
     apply(plugin = "java")
     apply(plugin = "io.izzel.taboolib")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+
+    taboolib {
+        env {
+            install(Basic)
+            install(MinecraftChat)
+        }
+        version { taboolib = "6.2.4-ddf2cc9" }
+    }
     
     repositories {
         mavenCentral()
     }
     
     dependencies {
-        "taboo"("org.tabooproject.fluxon:core:1.4.4") { isTransitive = false }
-        "compileOnly"(kotlin("stdlib"))
-        "compileOnly"(rootProject.fileTree("libs"))
+        taboo("org.tabooproject.fluxon:core:1.4.5") { isTransitive = false }
+        compileOnly(kotlin("stdlib"))
+        compileOnly(rootProject.fileTree("libs"))
     }
     
     tasks.withType<JavaCompile> {

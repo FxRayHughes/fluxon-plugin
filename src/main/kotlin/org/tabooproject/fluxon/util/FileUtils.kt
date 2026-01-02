@@ -14,6 +14,7 @@ fun File.toScriptId(): String {
         .substringBeforeLast('.')
         .replace("[/\\\\]".toRegex(), "_")
         .drop(1)
+        .substringAfter('_')
 }
 
 /**

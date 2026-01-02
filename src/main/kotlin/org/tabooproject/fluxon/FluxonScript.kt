@@ -106,7 +106,7 @@ class FluxonScript(
             val release = environment.getFunctionOrNull("release")
             if (release != null) {
                 try {
-                    release.call(FunctionContext(release, null, emptyArray(), FluxonRuntime.getInstance().newEnvironment()))
+                    release.call(FunctionContext(release, null, emptyArray(), environment))
                 } catch (ex: FluxonRuntimeError) {
                     ex.printError()
                 }
