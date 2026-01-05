@@ -1,5 +1,6 @@
 package org.tabooproject.fluxon
 
+import jdk.jfr.Recording
 import org.tabooproject.fluxon.FluxonLibrary.loadScriptFile
 import org.tabooproject.fluxon.profiler.FluxonProfiler
 import org.tabooproject.fluxon.runtime.FluxonRuntime
@@ -72,7 +73,7 @@ object FluxonCommand {
                 try {
                     val (result, time) = execution {
                         FluxonShell.invoke(ctx["script"], useCache = false) {
-                            defineRootVariable("sender", sender)
+                            it.defineRootVariable("sender", sender)
                         }
                     }
                     result?.exceptFluxonCompletableFutureError()
@@ -272,7 +273,7 @@ object FluxonCommand {
         // 启动 JFR 录制（如果启用）
         val jfrRecording = if (enableJfr) {
             try {
-                val recording = jdk.jfr.Recording()
+                val recording = Recording()
                 // 启用 Fluxon 自定义事件
                 recording.enable("fluxon.ScriptExecution").withoutStackTrace()
                 recording.enable("fluxon.EnvironmentCreation").withoutStackTrace()

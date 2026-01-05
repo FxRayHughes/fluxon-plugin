@@ -6,6 +6,7 @@ import org.tabooproject.fluxon.parser.expression.literal.Literal
 import org.tabooproject.fluxon.parser.statement.ExpressionStatement
 import org.tabooproject.fluxon.runtime.Environment
 import org.tabooproject.fluxon.runtime.FluxonRuntime
+import java.util.function.Consumer
 
 open class ParseScript(val blocks: List<ParseResult>?) {
 
@@ -24,7 +25,7 @@ open class ParseScript(val blocks: List<ParseResult>?) {
      *
      * @param env 脚本执行环境
      */
-    open fun invoke(env: Environment.() -> Unit = {}): Any? {
+    open fun invoke(env: Consumer<Environment> = Consumer {}): Any? {
         if (blocks == null) return null
         // 如果是明文，则跳过脚本环境直接取值
         if (isPlain) {
@@ -35,6 +36,6 @@ open class ParseScript(val blocks: List<ParseResult>?) {
                 else -> null
             }
         }
-        return FluxonShell.invoke(blocks, FluxonRuntime.getInstance().newEnvironment().also(env))
+        return FluxonShell.invoke(blocks, FluxonRuntime.getInstance().newEnvironment().also { env.accept(it) })
     }
 }

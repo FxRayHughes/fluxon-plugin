@@ -12,6 +12,7 @@ import org.tabooproject.fluxon.runtime.error.FluxonRuntimeError
 import org.tabooproject.fluxon.util.SimpleCache
 import org.tabooproject.fluxon.util.printError
 import taboolib.common.platform.function.warning
+import java.util.function.Consumer
 
 object FluxonShell {
 
@@ -23,8 +24,8 @@ object FluxonShell {
     /**
      * 解释脚本但不执行
      */
-    fun parse(script: String, env: Environment.() -> Unit = {}): ParseScript {
-        return ParseScript(parse(script, FluxonRuntime.getInstance().newEnvironment().also(env)))
+    fun parse(script: String, env: Consumer<Environment> = Consumer {}): ParseScript {
+        return ParseScript(parse(script, FluxonRuntime.getInstance().newEnvironment().also { env.accept(it) }))
     }
 
     /**
@@ -34,9 +35,9 @@ object FluxonShell {
      * @param useCache    是否使用缓存，如果脚本修改频繁建议不使用缓存
      * @param env         脚本执行环境
      */
-    fun invoke(script: String, useCache: Boolean = true, env: Environment.() -> Unit = {}): Any? {
+    fun invoke(script: String, useCache: Boolean = true, env: Consumer<Environment> = Consumer {}): Any? {
         // 构建脚本环境
-        val environment = FluxonRuntime.getInstance().newEnvironment().also(env)
+        val environment = FluxonRuntime.getInstance().newEnvironment().also { env.accept(it) }
         // 解析脚本（如果有缓存则跳过解析过程）
         val parsed = if (useCache) {
             scriptCache.get(script) { parse(script, environment) }
@@ -54,7 +55,7 @@ object FluxonShell {
      * @param useCache    是否使用缓存，如果脚本修改频繁建议不使用缓存
      * @param env         脚本执行环境
      */
-    fun invokeWithProfiling(script: String, useCache: Boolean = true, env: Environment.() -> Unit = {}): Any? {
+    fun invokeWithProfiling(script: String, useCache: Boolean = true, env: Consumer<Environment> = Consumer {}): Any? {
         val event = InterpreterExecutionEvent()
         event.begin()
         event.scriptContent = if (script.length > 100) script.take(100) + "..." else script
@@ -64,7 +65,7 @@ object FluxonShell {
             val envEvent = EnvironmentCreationEvent()
             envEvent.begin()
             envEvent.context = "FluxonShell.invoke"
-            val environment = FluxonRuntime.getInstance().newEnvironment().also(env)
+            val environment = FluxonRuntime.getInstance().newEnvironment().also { env.accept(it) }
             envEvent.commit()
             // 解析脚本（如果有缓存则跳过解析过程）
             val parsed = if (useCache) {
@@ -76,7 +77,7 @@ object FluxonShell {
                 parse(script, environment)
             }
             event.parsedBlockCount = parsed.size
-            
+
             invoke(parsed, environment)
         } finally {
             event.commit()
